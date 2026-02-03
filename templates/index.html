@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lebensmittel Inventar</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lebensmittel Inventar</title>
+    
+    <!-- PWA Meta-Tags -->
+    <meta name="theme-color" content="#667eea">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Inventar">
+    <link rel="manifest" href="/static/manifest.json">
+    <link rel="apple-touch-icon" href="/static/icons/icon-192.png">
+    
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <div class="header-bar">
+            <h1>🏠 Lebensmittel Inventar</h1>
+            <div class="user-info">
+                <span id="haushalt-name">Kein Haushalt ausgewählt</span>
+                <a href="/haushalt" class="btn-link">Haushalte verwalten</a>
+                <a href="/logout" class="btn-link">Logout</a>
+            </div>
+        </div>
+
+        <!-- Hinweis wenn kein Haushalt ausgewählt -->
+        <div id="kein-haushalt-hinweis" style="display:none;">
+            <div class="info-box">
+                <h3>⚠️ Kein Haushalt ausgewählt</h3>
+                <p>Bitte wähle einen Haushalt aus oder erstelle einen neuen.</p>
+                <a href="/haushalt"><button>Zu den Haushalten</button></a>
+            </div>
+        </div>
+
+        <!-- Hauptbereich (nur sichtbar wenn Haushalt ausgewählt) -->
+        <div id="hauptbereich" style="display:none;">
+            <!-- Barcode Scanner Bereich -->
+            <div class="scanner-section">
+                <h2>Barcode scannen</h2>
+                <button id="scanner-button" onclick="starteScanner()">Kamera-Scanner starten</button>
+                <div id="scanner-container">
+                    <p style="color: #999;">Klicke auf "Kamera-Scanner starten"</p>
+            </div>
+            <input type="text" id="barcode-input" placeholder="Oder Barcode manuell eingeben">
+            <button onclick="sucheBarcode()">Suchen</button>
+        </div>
+
+            <!-- Produktinfo Anzeige -->
+            <div id="product-info" style="display:none;">
+                <h3>Gefundenes Produkt</h3>
+                <img id="product-image" src="" alt="Produktbild" style="max-width: 200px;">
+                <p><strong>Name:</strong> <span id="product-name"></span></p>
+                <p><strong>Marke:</strong> <span id="product-brand"></span></p>
+                <label>Menge: <input type="number" id="product-quantity" value="1" min="1"></label>
+                <label>
+                    MHD (optional): 
+                    <input type="date" id="product-mhd" placeholder="TT.MM.JJJJ">
+                </label>
+                <button onclick="produktHinzufuegen()">Zum Inventar hinzufügen</button>
+            </div>
+
+            <!-- Inventar Liste -->
+            <div class="inventory-section">
+                <h2>Dein Inventar</h2>
+    
+                <!-- Suchfeld -->
+                <div class="search-container">
+                    <input type="text" id="search-input" placeholder="🔍 Produkte suchen..." oninput="sucheImInventar()">
+                    <button id="clear-search" onclick="sucheLöschen()" style="display: none;">✕</button>
+                </div>
+    
+                <div id="inventory-list"></div>
+            </div>
+        </div>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+    <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+    <script src="{{ url_for('static', filename='js/scanner.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+    <script>
+        // Service Worker registrieren
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('/static/service-worker.js')
+                .then(reg => console.log('Service Worker registriert:', reg))
+                .catch(err => console.error('Service Worker Fehler:', err));
+        }
+    </script>
+    
+    <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+    <script src="{{ url_for('static', filename='js/scanner.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+
+</body>
+</html>

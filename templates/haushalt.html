@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Haushalt - Inventar App</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <h1>🏠 Haushalte verwalten</h1>
+        
+        <div style="text-align: right; margin-bottom: 20px;">
+            <a href="/" style="color: #667eea; text-decoration: none;">← Zurück zum Inventar</a>
+        </div>
+
+        <!-- Neuen Haushalt erstellen -->
+        <div class="section">
+            <h2>Neuen Haushalt erstellen</h2>
+            <input type="text" id="neuer-haushalt-name" placeholder="Haushalt-Name (z.B. Meine WG)">
+            <button onclick="haushaltErstellen()">Erstellen</button>
+        </div>
+
+        <!-- Haushalt beitreten -->
+        <div class="section">
+            <h2>Einem Haushalt beitreten</h2>
+            <input type="text" id="einladungscode" placeholder="Einladungscode eingeben">
+            <button onclick="haushaltBeitreten()">Beitreten</button>
+        </div>
+
+        <!-- Meine Haushalte -->
+        <div class="section">
+            <h2>Meine Haushalte</h2>
+            <div id="haushalte-liste"></div>
+        </div>
+    </div>
+
+    <script>
+        // Haushalte laden und anzeigen
+        async function ladeHaushalte() {
+            try {
+                const response = await fetch('/api/haushalte');
+                const haushalte = await response.json();
+                
+                const liste = document.getElementById('haushalte-liste');
+                
+                if (haushalte.length === 0) {
+                    liste.innerHTML = '<p style="color: #666;">Noch keine Haushalte. Erstelle einen oder tritt einem bei!</p>';
+                    return;
+                }
+                
+                liste.innerHTML = '';
+                
+                haushalte.forEach(haushalt => {
+                    const div = document.createElement('div');
+                    div.className = 'haushalt-card';
+                    div.innerHTML = `
+                        <h3>${haushalt.name}</h3>
+                        <p><strong>Einladungscode:</strong> <code>${haushalt.einladungscode}</code></p>
+                        <p>👥 ${haushalt.mitglieder_anzahl} Mitglieder</p>
+                        <p>📦 ${haushalt.produkte_anzahl} Produkte</p>
+                        <button onclick="haushaltAuswaehlen(${haushalt.id}, '${haushalt.name}')">Auswählen & zum Inventar</button>
+                    `;
+                    liste.appendChild(div);
+                });
+            } catch (error) {
+                console.error('Fehler:', error);
+            }
+        }
+
+        // Neuen Haushalt erstellen
+        async function haushaltErstellen() {
+            const name = document.getElementById('neuer-haushalt-name').value;
+            
+            if (!name) {
+                alert('Bitte Namen eingeben');
+                return;
+            }
+            
+            try {
+                const response = await fetch('/api/haushalt/erstellen', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ name })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    alert(`Haushalt erstellt!\n\nEinladungscode: ${data.haushalt.einladungscode}\n\nTeile diesen Code mit deinen Mitbewohnern!`);
+                    document.getElementById('neuer-haushalt-name').value = '';
+                    ladeHaushalte();
+                } else {
+                    alert(data.message);
+                }
+            } catch (error) {
+                console.error('Fehler:', error);
+                alert('Fehler beim Erstellen');
+            }
+        }
+
+        // Haushalt beitreten
+        async function haushaltBeitreten() {
+            const code = document.getElementById('einladungscode').value.trim().toUpperCase();
+            
+            if (!code) {
+                alert('Bitte Code eingeben');
+                return;
+            }
+            
+            try {
+                const response = await fetch('/api/haushalt/beitreten', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ code })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    alert(`Erfolgreich beigetreten: ${data.haushalt.name}`);
+                    document.getElementById('einladungscode').value = '';
+                    ladeHaushalte();
+                } else {
+                    alert(data.message);
+                }
+            } catch (error) {
+                console.error('Fehler:', error);
+                alert('Fehler beim Beitreten');
+            }
+        }
+
+        // Haushalt auswählen und zum Inventar
+        function haushaltAuswaehlen(id, name) {
+            localStorage.setItem('aktuellerHaushalt', JSON.stringify({ id, name }));
+            window.location.href = '/';
+        }
+
+        // Beim Laden
+        document.addEventListener('DOMContentLoaded', ladeHaushalte);
+    </script>
+</body>
+</html>

@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registrierung - Inventar App</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lebensmittel Inventar</title>
+    
+    <!-- PWA Meta-Tags -->
+    <meta name="theme-color" content="#667eea">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Inventar">
+    <link rel="manifest" href="/static/manifest.json">
+    <link rel="apple-touch-icon" href="/static/icons/icon-192.png">
+    
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <h1>📝 Registrierung</h1>
+        
+        <div class="auth-form">
+            <input type="text" id="username" placeholder="Benutzername">
+            <input type="email" id="email" placeholder="Email">
+            <input type="password" id="passwort" placeholder="Passwort">
+            <input type="password" id="passwort2" placeholder="Passwort wiederholen">
+            <button onclick="register()">Registrieren</button>
+            
+            <p style="text-align: center; margin-top: 20px;">
+                Schon ein Account? <a href="/login">Hier einloggen</a>
+            </p>
+        </div>
+    </div>
+
+    <script>
+        async function register() {
+            const username = document.getElementById('username').value;
+            const email = document.getElementById('email').value;
+            const passwort = document.getElementById('passwort').value;
+            const passwort2 = document.getElementById('passwort2').value;
+            
+            if (!username || !email || !passwort || !passwort2) {
+                alert('Bitte alle Felder ausfüllen');
+                return;
+            }
+            
+            if (passwort !== passwort2) {
+                alert('Passwörter stimmen nicht überein');
+                return;
+            }
+            
+            if (passwort.length < 6) {
+                alert('Passwort muss mindestens 6 Zeichen lang sein');
+                return;
+            }
+            
+            try {
+                const response = await fetch('/register', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ username, email, passwort })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    window.location.href = '/';
+                } else {
+                    alert(data.message);
+                }
+            } catch (error) {
+                console.error('Fehler:', error);
+                alert('Registrierung fehlgeschlagen');
+            }
+        }
+    </script>
+            // Service Worker registrieren
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('/static/service-worker.js')
+                .then(reg => console.log('Service Worker registriert:', reg))
+                .catch(err => console.error('Service Worker Fehler:', err));
+        }
+    </script>
+    
+    <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+    <script src="{{ url_for('static', filename='js/scanner.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+</body>
+</html>
