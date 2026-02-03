@@ -356,5 +356,13 @@ def update_menge(produkt_id):
     return jsonify({'success': True, 'menge': produkt.menge})
 
 if __name__ == '__main__':
-    app.run(debug=True, host='0.0.0.0', port=5000, 
-            ssl_context=('cert.pem', 'key.pem'))
+    # Für lokale Entwicklung
+    import os
+    if os.environ.get('RENDER'):
+        # Production auf Render
+        port = int(os.environ.get('PORT', 10000))
+        app.run(host='0.0.0.0', port=port)
+    else:
+        # Lokale Entwicklung mit SSL
+        app.run(debug=True, host='0.0.0.0', port=5000, 
+                ssl_context=('cert.pem', 'key.pem'))
